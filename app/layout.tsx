@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Azeret_Mono as Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { SidebarProvider } from "./components/ui/sidebar";
+import AppSidebar from "./components/AppSidebar/AppSidebar";
+import { Header } from "./components/Header/Header";
+import { MainStoreProvider } from "./lib/StoreProvider";
+import ReactQueryProviders from "./lib/ReactQueryProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,12 +28,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
-    </html>
+    <ReactQueryProviders>
+      <html lang='en'>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          <SidebarProvider>
+            <AppSidebar />
+            <main className='flex-1'>
+              <Header />
+              <MainStoreProvider>{children}</MainStoreProvider>
+            </main>
+          </SidebarProvider>
+        </body>
+      </html>
+    </ReactQueryProviders>
   );
 }
