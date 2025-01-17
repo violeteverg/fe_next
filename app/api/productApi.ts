@@ -105,9 +105,29 @@ export async function getAllProductDropdown() {
         "Content-Type": "application/json",
       },
     });
-    console.log(response.data, "ini data");
 
     return response?.data?.data;
+  } catch (error: any) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        `Axios error: ${error.response?.status} - ${error.response?.statusText}`
+      );
+    } else {
+      console.error(`Unexpected error: ${error?.message}`);
+    }
+    throw error;
+  }
+}
+
+export async function removeProduct(productId: string | number) {
+  try {
+    const response = await axios.delete(`${BASE_URL}/product/${productId}`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    return response.data;
   } catch (error: any) {
     if (axios.isAxiosError(error)) {
       console.error(

@@ -9,9 +9,10 @@ import { useState } from "react";
 import { DataTable } from "@/app/components/DataTable/DataTable";
 import { useMainStore } from "@/app/lib/StoreProvider";
 import { columns } from "./Columns";
-import { getAllTransaction } from "@/app/api/transactionApi";
-import { useQuery } from "@tanstack/react-query";
+import { getAllTransaction, removeTransaction } from "@/app/api/transactionApi";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import TransactionModal from "@/app/components/TransactionModal/TransactionModal";
+import { DeleteModal } from "@/app/components/DeleteModal/DeleteModal";
 
 const renderSubComponent = ({ row }: { row: any }) => {
   const transaction = row.original;
@@ -54,15 +55,32 @@ const renderSubComponent = ({ row }: { row: any }) => {
 };
 
 export default function TransactionPage() {
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
-  const { isOpen, setIsOpen, setType } = useMainStore((state) => state);
+  const { isOpen, isDelete, transactionId, setIsOpen, setType } = useMainStore(
+    (state) => state
+  );
 
   const { data: transactionData, isLoading } = useQuery({
     queryKey: ["TRANSACTION", page, perPage, searchTerm],
     queryFn: () => getAllTransaction(page, perPage, searchTerm),
   });
+
+  const { mutate: removeTransactionMutation } = useMutation({
+    mutationFn: (id: any) => removeTransaction(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["TRANSACTION"] });
+    },
+    onError: () => {
+      alert("something when srong");
+    },
+  });
+
+  const deleteButtonHandler = () => {
+    removeTransactionMutation(transactionId);
+  };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -73,6 +91,7 @@ export default function TransactionPage() {
     setIsOpen(true);
     setType("create");
   };
+
   return (
     <div className='flex flex-col w-full '>
       <div className='flex flex-col justify-center mx-4 my-8 space-y-4'>
@@ -112,6 +131,13 @@ export default function TransactionPage() {
           )}
         </div>
         {isOpen && <TransactionModal />}
+        {isDelete && (
+          <DeleteModal
+            title={`delete bill`}
+            description='are you sure delete this transaction'
+            onDelete={deleteButtonHandler}
+          />
+        )}
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Button } from "@/app/components/ui/button";
@@ -8,20 +9,37 @@ import { useState } from "react";
 import { DataTable } from "@/app/components/DataTable/DataTable";
 import { useMainStore } from "@/app/lib/StoreProvider";
 import ItemModal from "@/app/components/ItemModal/ItemModal";
-import { useQuery } from "@tanstack/react-query";
-import { getAllProduct } from "@/app/api/productApi";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getAllProduct, removeProduct } from "@/app/api/productApi";
+import { DeleteModal } from "@/app/components/DeleteModal/DeleteModal";
 
 export default function ItemPage() {
+  const queryClient = useQueryClient();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
-  const { isOpen, setIsOpen, setType } = useMainStore((state) => state);
+  const { productId, isOpen, isDelete, setIsOpen, setType } = useMainStore(
+    (state) => state
+  );
 
   const { data: productData, isLoading } = useQuery({
     queryKey: ["PRODUCT", page, perPage, searchTerm],
     queryFn: () => getAllProduct(page, perPage, searchTerm),
   });
+  const { mutate: removeProductMutation } = useMutation({
+    mutationFn: (id: any) => removeProduct(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["CUSTOMER"] });
+    },
+    onError: () => {
+      alert("something when wrong");
+    },
+  });
 
+  const deleteButtonHandler = () => {
+    removeProductMutation(productId);
+  };
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
     setPage(1);
@@ -68,6 +86,13 @@ export default function ItemPage() {
         </div>
       </div>
       {isOpen && <ItemModal />}
+      {isDelete && (
+        <DeleteModal
+          title={`delete product`}
+          description='are you sure delete this product'
+          onDelete={deleteButtonHandler}
+        />
+      )}
     </div>
   );
 }

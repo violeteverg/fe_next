@@ -97,16 +97,14 @@ export const columns: ColumnDef<Transaction>[] = [
     id: "actions",
     cell: ({ row }) => {
       const customer = row.original;
-      const { setIsOpen, setType, setTransactionId } = useMainStore(
-        (state) => state
-      );
+      const { setIsOpen, setType, setTransactionId, setIsDelete } =
+        useMainStore((state) => state);
 
       return (
         <div className='flex gap-2'>
           <Button
             className='bg-green-300'
             onClick={() => {
-              // console.log(customer.id, "transaction id");
               setTransactionId(customer?.id);
               setIsOpen(true);
               setType("update");
@@ -116,7 +114,10 @@ export const columns: ColumnDef<Transaction>[] = [
           </Button>
           <Button
             className='bg-red-300'
-            // onClick={() => console.log(customer.id_nota)}
+            onClick={() => {
+              setTransactionId(customer?.id);
+              setIsDelete(true);
+            }}
           >
             Delete
           </Button>

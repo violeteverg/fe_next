@@ -90,11 +90,9 @@ export default function TransactionForm({
       })),
     };
     if (type === "update") {
-      console.log(formattedData.id);
       updateTransactionMutation({ id: data.id, val: formattedData });
     } else {
       createTransactionMutation(formattedData);
-      console.log(formattedData);
     }
   };
   const pending = isPendingCreate || isPendingUpdate;

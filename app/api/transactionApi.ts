@@ -100,3 +100,27 @@ export async function updateTransaction(
     throw error;
   }
 }
+
+export async function removeTransaction(transactionId: number) {
+  try {
+    const response = await axios.delete(
+      `${BASE_URL}/transaction/${transactionId}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        `Axios error: ${error.response?.status} - ${error.response?.statusText}`
+      );
+    } else {
+      console.error(`Unexpected error: ${error?.message}`);
+    }
+    throw error;
+  }
+}

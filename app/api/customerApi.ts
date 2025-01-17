@@ -118,3 +118,23 @@ export async function getAllCustomerDropdown() {
     throw error;
   }
 }
+export async function removeCustomer(customerId: string | number) {
+  try {
+    const response = await axios.delete(`${BASE_URL}/customer/${customerId}`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    return response.data;
+  } catch (error: any) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        `Axios error: ${error.response?.status} - ${error.response?.statusText}`
+      );
+    } else {
+      console.error(`Unexpected error: ${error?.message}`);
+    }
+    throw error;
+  }
+}

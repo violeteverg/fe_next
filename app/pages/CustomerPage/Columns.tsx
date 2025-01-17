@@ -77,7 +77,7 @@ export const columns: ColumnDef<Customer>[] = [
     id: "actions",
     cell: ({ row }) => {
       const customer = row.original;
-      const { setIsOpen, setType, setCustomerId } = useMainStore(
+      const { setIsOpen, setType, setIsDelete, setCustomerId } = useMainStore(
         (state) => state
       );
 
@@ -95,7 +95,10 @@ export const columns: ColumnDef<Customer>[] = [
           </Button>
           <Button
             className='bg-red-300'
-            // onClick={() => console.log(customer.pelanggan_id)}
+            onClick={() => {
+              setCustomerId(String(customer.id_customer));
+              setIsDelete(true);
+            }}
           >
             Delete
           </Button>

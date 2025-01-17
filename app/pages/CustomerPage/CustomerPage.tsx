@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -9,20 +10,37 @@ import { DataTable } from "@/app/components/DataTable/DataTable";
 import CustomerModal from "@/app/components/CustomerModal/CustomerModal";
 
 import { useMainStore } from "@/app/lib/StoreProvider";
-import { useQuery } from "@tanstack/react-query";
-import { getAllCustomer } from "@/app/api/customerApi";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getAllCustomer, removeCustomer } from "@/app/api/customerApi";
+import { DeleteModal } from "@/app/components/DeleteModal/DeleteModal";
 
 export default function CustomerPage() {
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
-  const { isOpen, setIsOpen, setType } = useMainStore((state) => state);
+  const { customerId, isOpen, isDelete, setIsOpen, setType } = useMainStore(
+    (state) => state
+  );
 
   const { data: customerData, isLoading } = useQuery({
     queryKey: ["CUSTOMER", page, perPage, searchTerm],
     queryFn: () => getAllCustomer(page, perPage, searchTerm),
   });
 
+  const { mutate: removeCustomerMutation } = useMutation({
+    mutationFn: (id: any) => removeCustomer(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["CUSTOMER"] });
+    },
+    onError: () => {
+      alert("something when wrong");
+    },
+  });
+
+  const deleteButtonHandler = () => {
+    removeCustomerMutation(customerId);
+  };
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
     setPage(1);
@@ -71,6 +89,13 @@ export default function CustomerPage() {
         </div>
       </div>
       {isOpen && <CustomerModal />}
+      {isDelete && (
+        <DeleteModal
+          title={`delete customer`}
+          description='are you sure delete this customer'
+          onDelete={deleteButtonHandler}
+        />
+      )}
     </div>
   );
 }

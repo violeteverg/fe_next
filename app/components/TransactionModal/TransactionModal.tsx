@@ -30,7 +30,7 @@ export default function TransactionModal() {
   });
 
   const transaction = transactionData?.data || {};
-  console.log(transaction, "by id");
+
   const defaultValues =
     type === "update" && !isLoading && transaction
       ? {
